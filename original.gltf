@@ -12,30 +12,30 @@
 		  ],
 		  "samplers": [
 			{
-			  "input": 10,
+			  "input": 4,
 			  "interpolation": "STEP",
-			  "output": 11
+			  "output": 5
 			}
 		  ]
 		}
     ],
-    "accessors": [
+	"accessors": [
 		{
 			"bufferView": 0,
 			"byteOffset": 0,
 			"componentType": 5126,
 			"count": 4,
-			"normalized": false,
 			"max": [
 				1.0,
-				1.0,
+				0.0,
 				1.0
 			],
 			"min": [
 				-1.0,
-				-1.0,
+				0.0,
 				-1.0
 			],
+			"normalized": false,
 			"type": "VEC3"
 		},
 		{
@@ -43,6 +43,16 @@
 			"byteOffset": 0,
 			"componentType": 5126,
 			"count": 4,
+			"max": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"min": [
+				0.0,
+				1.0,
+				0.0
+			],
 			"normalized": false,
 			"type": "VEC3"
 		},
@@ -51,6 +61,14 @@
 			"byteOffset": 0,
 			"componentType": 5126,
 			"count": 4,
+			"max": [
+				1.0,
+				1.0
+			],
+			"min": [
+				0.0,
+				0.0
+			],
 			"normalized": false,
 			"type": "VEC2"
 		},
@@ -59,61 +77,19 @@
 			"byteOffset": 0,
 			"componentType": 5123,
 			"count": 6,
+			"max": [
+				3.0
+			],
+			"min": [
+				0.0
+			],
 			"normalized": false,
 			"type": "SCALAR"
 		},
 		{
 			"bufferView": 4,
-			"byteOffset": 0,
 			"componentType": 5126,
-			"count": 4,
-			"normalized": false,
-			"type": "VEC2"
-		},
-		{
-			"bufferView": 5,
-			"byteOffset": 0,
-			"componentType": 5126,
-			"count": 4,
-			"normalized": false,
-			"type": "VEC2"
-		},
-		{
-			"bufferView": 6,
-			"byteOffset": 0,
-			"componentType": 5126,
-			"count": 4,			
-			"normalized": false,
-			"type": "VEC2"
-		},
-		{
-			"bufferView": 7,
-			"byteOffset": 0,
-			"componentType": 5126,
-			"count": 4,
-			"normalized": false,
-			"type": "VEC2"
-		},
-		{
-			"bufferView": 8,
-			"byteOffset": 0,
-			"componentType": 5126,
-			"count": 4,
-			"normalized": false,
-			"type": "VEC2"
-		},
-		{
-			"bufferView": 9,
-			"byteOffset": 0,
-			"componentType": 5126,
-			"count": 4,
-			"normalized": false,
-			"type": "VEC2"
-		},
-		{
-			"bufferView": 10,
-			"componentType": 5126,
-			"count": 6,
+			"count": -1,
 			"max": [
 				0.0
 			],
@@ -123,17 +99,13 @@
 			"type": "SCALAR"
 		},		
 		{
-			"bufferView": 11,
+			"bufferView": 5,
 			"componentType": 5126,
-			"count": 36,
+			"count": -1,
 			"type": "SCALAR"
 		}		
 	],
 	"asset": {
-		"extras": {
-			"created": "Fri Nov 19 13:47:23 2021"
-		},
-		"generator": "Gestaltor 2021.7.0  Development (internal) (dev-2a46303ab)",
 		"version": "2.0"
 	},
 	"bufferViews": [
@@ -162,54 +134,18 @@
 		},
 		{
 			"buffer": 0,
-			"byteLength": 32,
-			"byteOffset": 140,
-			"byteStride": 8
+			"byteLength": -1,
+			"byteOffset": 140
 		},
 		{
 			"buffer": 0,
-			"byteLength": 32,
-			"byteOffset": 172,
-			"byteStride": 8
-		},
-		{
-			"buffer": 0,
-			"byteLength": 32,
-			"byteOffset": 204,
-			"byteStride": 8
-		},
-		{
-			"buffer": 0,
-			"byteLength": 32,
-			"byteOffset": 236,
-			"byteStride": 8
-		},
-		{
-			"buffer": 0,
-			"byteLength": 32,
-			"byteOffset": 268,
-			"byteStride": 8
-		},
-		{
-			"buffer": 0,
-			"byteLength": 32,
-			"byteOffset": 300,
-			"byteStride": 8
-		},
-		{
-			"buffer": 0,
-			"byteLength": 24,
-			"byteOffset": 332
-		},
-		{
-			"buffer": 0,
-			"byteLength": 144,
-			"byteOffset": 356
+			"byteLength": -1,
+			"byteOffset": -1
 		}
 	],
 	"buffers": [
 		{
-			"byteLength": 500,
+			"byteLength": 140,
 			"uri": "original.bin"
 		}
 	],
@@ -218,12 +154,14 @@
 	],
 	"images": [
 		{
+			"mimeType": "image/png",
 			"uri": "pngegg.png"
 		}
 	],
 	"materials": [
 		{
-			"alphaMode": "MASK",
+			"alphaMode": "BLEND",
+			"doubleSided": true,
 			"extensions": {
 				"KHR_materials_unlit": {}
 			},
@@ -247,35 +185,12 @@
 					"material": 0,
 					"mode": 4,
 					"targets": [
-						{
-						  "TEXCOORD_0": 4
-						},
-						{
-						  "TEXCOORD_0": 5
-						},
-						{
-						  "TEXCOORD_0": 6
-						},
-						{
-						  "TEXCOORD_0": 7
-						},
-						{
-						  "TEXCOORD_0": 8
-						},
-						{
-						  "TEXCOORD_0": 9
-						}
 					]					
 				}
 			],
-			"weights": [
-				1.0,
-				0.0,
-				0.0,
-				0.0,
-				0.0,
-				0.0
+			"weights": [				
 			]
+
 		}
 	],
 	"nodes": [
@@ -286,10 +201,8 @@
 	"samplers": [
 		{}
 	],
-	"scene": 0,
 	"scenes": [
 		{
-			"name": "Scene",
 			"nodes": [
 				0
 			]

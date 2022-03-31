@@ -99,7 +99,64 @@ int main(int argc, char *argv[])
 
 	json glTF = json::parse(templateContent);
 
+	//
+
 	std::vector<float> floatData;
+
+	// Weights and targets
+
+	glTF["meshes"][0]["weights"].push_back(1.0f);
+	glTF["meshes"][0]["primitives"][0]["targets"].push_back(json::object());
+	size_t index = 6;
+	glTF["meshes"][0]["primitives"][0]["targets"][0]["TEXCOORD_0"] = index;				// Needs to be created
+	for (size_t i = 1; i < clips; i++)
+	{
+		glTF["meshes"][0]["weights"].push_back(0.0f);
+		glTF["meshes"][0]["primitives"][0]["targets"].push_back(json::object());
+		glTF["meshes"][0]["primitives"][0]["targets"][i]["TEXCOORD_0"] = index + i;		// Needs to be created
+	}
+
+	// Time as input
+
+	size_t byteOffset = 140;
+
+	for (size_t i = 0; i < clips; i++)
+	{
+		floatData.push_back(i * (float)(1.0f / fps));
+	}
+
+	size_t byteLength = sizeof(float) * clips;
+
+	glTF["bufferViews"][4]["byteLength"] = byteLength;
+	glTF["accessors"][4]["count"] = clips;
+	glTF["accessors"][4]["max"][0] = floatData.back();
+
+	byteOffset += byteLength;
+
+	// Weights as output
+
+	for (size_t i = 0; i < clips; i++)
+	{
+		for (size_t k = 0; k < clips; k++)
+		{
+			if (i == k)
+			{
+				floatData.push_back(1.0f);
+			}
+			else
+			{
+				floatData.push_back(0.0f);
+			}
+		}
+	}
+
+	byteLength = sizeof(float) * clips * clips;
+
+	glTF["bufferViews"][5]["byteOffset"] = byteOffset;
+	glTF["bufferViews"][5]["byteLength"] = byteLength;
+	glTF["accessors"][5]["count"] = clips * clips;
+
+	byteOffset += byteLength;
 
 	// Frames
 
@@ -123,32 +180,30 @@ int main(int argc, char *argv[])
 			// UV for Vertex 3
 			floatData.push_back(-1.0f + columnsStep * (float)(column + 1));
 			floatData.push_back(-1.0f + rowsStep * (float)(row + 1));
-		}
-	}
 
-	// Time
+			//
 
-	for (size_t i = 0; i < clips; i++)
-	{
-		floatData.push_back(i * (float)(1.0f / fps));
-	}
+			byteLength = sizeof(float) * 8;
 
-	glTF["accessors"][10]["max"][0] = floatData.back();
+			auto bufferView = json::object();
+			bufferView["buffer"] = 0;
+			bufferView["byteLength"] = byteLength;
+			bufferView["byteOffset"] = byteOffset;
+			byteOffset += byteLength;
 
-	// Weights
+			glTF["bufferViews"].push_back(bufferView);
 
-	for (size_t i = 0; i < clips; i++)
-	{
-		for (size_t k = 0; k < clips; k++)
-		{
-			if (i == k)
-			{
-				floatData.push_back(1.0f);
-			}
-			else
-			{
-				floatData.push_back(0.0f);
-			}
+			auto accessor = json::object();
+			accessor["bufferView"] = index;
+			accessor["byteOffset"] = 0;
+			accessor["componentType"] = 5126;
+			accessor["count"] = 4;
+			accessor["normalized"] = false;
+			accessor["type"] = "VEC2";
+
+			glTF["accessors"].push_back(accessor);
+
+			index++;
 		}
 	}
 
@@ -173,6 +228,8 @@ int main(int argc, char *argv[])
 	}
 
 	glTF["buffers"][0]["uri"] = saveBinaryName;
+	glTF["buffers"][0]["byteLength"] = data.size();
+
 	glTF["images"][0]["uri"] = imageName;
 
 	if (!saveFile(glTF.dump(3), saveTemplateName))
@@ -181,6 +238,8 @@ int main(int argc, char *argv[])
 
 		return -1;
 	}
+
+	printf("Infi: Saved glTF\n");
 
 	return 0;
 }
