@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 	//
 	//
 
-	std::string loadBinaryName = "original.bin";
+	std::string loadBinaryName = "morph.bin";
 	std::string saveBinaryName = "untitled.bin";
 
 	std::string binaryContent;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	std::string loadTemplateName = "original.gltf";
+	std::string loadTemplateName = "morph.gltf";
 	std::string saveTemplateName = "untitled.gltf";
 
     std::string templateContent;
