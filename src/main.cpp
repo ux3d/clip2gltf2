@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	printf("Infi: Saved glTF\n");
+	printf("Info: Saved glTF '%s'\n", saveTemplateName.c_str());
 
 	return 0;
 }
