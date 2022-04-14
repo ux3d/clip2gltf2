@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 {
 	size_t rows = 1;
 	size_t columns = 6;
-	float fps = 15.0f;
+	float fps = 5.0f;
 	std::string imageName = "pngegg.png";
 
     for (int i = 0; i < argc; i++)
@@ -118,18 +118,20 @@ int main(int argc, char *argv[])
 
 	// Time as input
 
+	float frameTime = 1.0f / fps;
+
 	size_t byteOffset = 140;
 
 	for (size_t i = 0; i < clips; i++)
 	{
-		floatData.push_back(i * (float)(1.0f / fps));
+		floatData.push_back((float)i * frameTime);
 	}
 
 	size_t byteLength = sizeof(float) * clips;
 
 	glTF["bufferViews"][4]["byteLength"] = byteLength;
 	glTF["accessors"][4]["count"] = clips;
-	glTF["accessors"][4]["max"][0] = floatData.back();
+	glTF["accessors"][4]["max"][0] = floatData.back() + frameTime;
 
 	byteOffset += byteLength;
 

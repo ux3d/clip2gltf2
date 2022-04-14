@@ -7,11 +7,11 @@ clip2gltf2 is a command line tool for converting an animation strip to glTF 2.0.
 It uses the optional feature to morph texture coordinates in glTF 2.0: 
 [3.7.2.2. Morph Targets](https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#morph-targets)  
 
-Usage: `clip2gltf2.exe [-r 1 -c 6 -f 15.0 -i pngegg.png]`
+Usage: `clip2gltf2.exe [-r 1 -c 6 -f 5.0 -i pngegg.png]`
 
 `-r 1.0` Number of rows of the animation strip.  
 `-c 6.0` Number of columns of the animation strip.  
-`-f 15.0` Frames per second to be used.  
+`-f 5.0` Frames per second to be used.  
 `-i pngegg.png` Use another image beside the included animation strip.  
 
 
