@@ -1,0 +1,165 @@
+{
+	"animations": [
+		{
+		  "channels": [
+			{
+			  "sampler": -1,
+			  "target": {
+				"node": -1,
+				"path": "translation"
+			  }
+			}
+		  ],
+		  "samplers": [
+			{
+			  "input": -1,
+			  "interpolation": "STEP",
+			  "output": -1
+			}
+		  ]
+		}
+    ],
+	"accessors": [
+		{
+			"bufferView": 0,
+			"byteOffset": 0,
+			"componentType": 5126,
+			"count": 4,
+			"max": [
+				1.0,
+				0.0,
+				1.0
+			],
+			"min": [
+				-1.0,
+				0.0,
+				-1.0
+			],
+			"normalized": false,
+			"type": "VEC3"
+		},
+		{
+			"bufferView": 1,
+			"byteOffset": 0,
+			"componentType": 5126,
+			"count": 4,
+			"max": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"min": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"normalized": false,
+			"type": "VEC3"
+		},
+		{
+			"bufferView": 2,
+			"byteOffset": 0,
+			"componentType": 5123,
+			"count": 6,
+			"max": [
+				3.0
+			],
+			"min": [
+				0.0
+			],
+			"normalized": false,
+			"type": "SCALAR"
+		}
+	],
+	"asset": {
+		"version": "2.0"
+	},
+	"bufferViews": [
+		{
+			"buffer": 0,
+			"byteLength": 48,
+			"byteOffset": 0,
+			"byteStride": 12
+		},
+		{
+			"buffer": 0,
+			"byteLength": 48,
+			"byteOffset": 48,
+			"byteStride": 12
+		},
+		{
+			"buffer": 0,
+			"byteLength": 12,
+			"byteOffset": 96
+		}
+	],
+	"buffers": [
+		{
+			"byteLength": 108,
+			"uri": "translation.bin"
+		}
+	],
+	"extensionsUsed": [
+		"KHR_materials_unlit"
+	],
+	"images": [
+		{
+			"mimeType": "image/png",
+			"uri": "pngegg.png"
+		}
+	],
+	"materials": [
+		{
+			"alphaMode": "BLEND",
+			"doubleSided": true,
+			"extensions": {
+				"KHR_materials_unlit": {}
+			},
+			"pbrMetallicRoughness": {
+				"baseColorTexture": {
+					"index": 0
+				}
+			}
+		}
+	],
+	"meshes": [
+		{
+			"primitives": [
+				{
+					"attributes": {
+						"NORMAL": 1,
+						"POSITION": 0
+					},
+					"indices": 2,
+					"material": 0,
+					"mode": 4
+				}
+			]
+		}
+	],
+	"nodes": [
+		{
+			"children": [
+			]		
+		}
+	],
+	"samplers": [
+		{
+			"wrapS": 33071,
+			"wrapT": 33071
+		}
+	],
+	"scenes": [
+		{
+			"nodes": [
+				0
+			]
+		}
+	],
+	"textures": [
+		{
+			"sampler": 0,
+			"source": 0
+		}
+	]	
+}

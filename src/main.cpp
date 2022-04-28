@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -40,68 +42,360 @@ bool saveFile(const std::string& output, const std::string& filename)
 	return true;
 }
 
-int main(int argc, char *argv[])
+void generateScale(json& glTF, std::vector<float>& floatData, const size_t rows, const size_t columns, const float fps, const float epsilon)
 {
-	size_t rows = 1;
-	size_t columns = 6;
-	float fps = 5.0f;
-	std::string imageName = "pngegg.png";
-
-    for (int i = 0; i < argc; i++)
-    {
-        if (strcmp(argv[i], "-r") == 0 && (i + 1 < argc))
-        {
-            rows = (size_t)std::stoi(argv[i + 1]);
-        }
-        if (strcmp(argv[i], "-c") == 0 && (i + 1 < argc))
-        {
-            columns = (size_t)std::stoi(argv[i + 1]);
-        }
-        else if (strcmp(argv[i], "-f") == 0 && (i + 1 < argc))
-        {
-            fps = (float)std::stof(argv[i + 1]);
-        }
-        else if (strcmp(argv[i], "-i") == 0 && (i + 1 < argc))
-        {
-        	imageName = argv[i + 1];
-        }
-    }
-
 	size_t clips = rows * columns;
 
-	//
-	//
+	// Nodes and meshes
+	size_t newBuffer = 3;
 
-	std::string loadBinaryName = "morph.bin";
-	std::string saveBinaryName = "untitled.bin";
-
-	std::string binaryContent;
-	if (!loadFile(binaryContent, loadBinaryName))
+	for (size_t i = 0; i < clips; i++)
 	{
-		printf("Error: Could not load binary file '%s'\n", loadBinaryName.c_str());
+		glTF["nodes"].push_back(json::object());
+		glTF["nodes"][i + 1]["mesh"] = i;
+		glTF["nodes"][i + 1]["scale"] = json::array();
 
-		return -1;
+		if (i > 0)
+		{
+			glTF["nodes"][i + 1]["scale"][0] = epsilon;
+			glTF["nodes"][i + 1]["scale"][1] = epsilon;
+			glTF["nodes"][i + 1]["scale"][2] = epsilon;
+
+			glTF["meshes"].push_back(glTF["meshes"][0]);
+
+			glTF["animations"][0]["channels"].push_back(glTF["animations"][0]["channels"][0]);
+			glTF["animations"][0]["samplers"].push_back(glTF["animations"][0]["samplers"][0]);
+		}
+		else
+		{
+			glTF["nodes"][i + 1]["scale"][0] = 1.0f;
+			glTF["nodes"][i + 1]["scale"][1] = 1.0f;
+			glTF["nodes"][i + 1]["scale"][2] = 1.0f;
+
+			// Mesh does already exist
+
+			// Channel does already exist
+
+			// Sampler does already exist
+		}
+
+		glTF["meshes"][i]["primitives"][0]["attributes"]["TEXCOORD_0"] = newBuffer + i;
+
+		glTF["nodes"][0]["children"].push_back(i + 1);
+
+		glTF["animations"][0]["channels"][i]["sampler"] = i;
+		glTF["animations"][0]["channels"][i]["target"]["node"] = i + 1;
 	}
 
-	std::string loadTemplateName = "morph.gltf";
-	std::string saveTemplateName = "untitled.gltf";
+	// Frames
 
-    std::string templateContent;
-	if (!loadFile(templateContent, loadTemplateName))
+	size_t index = newBuffer;
+
+	size_t byteOffset = 108;
+	size_t byteLength = 0;
+
+	float columnsStep = 1.0f / (float)columns;
+	float rowsStep = 1.0f / (float)rows;
+
+	for (size_t row = 0; row < rows; row++)
 	{
-		printf("Error: Could not load template file '%s'\n", loadTemplateName.c_str());
+		for (size_t column = 0; column < columns; column++)
+		{
+			// UV for Vertex 0
+			floatData.push_back(glm::clamp(columnsStep * (float)(column + 0), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(row + 0), 0.0f, 1.0f));
+			// UV for Vertex 1
+			floatData.push_back(glm::clamp(columnsStep * (float)(column + 0), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(row + 1), 0.0f, 1.0f));
 
-		return -1;
+			// UV for Vertex 2
+			floatData.push_back(glm::clamp(columnsStep * (float)(column + 1), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(row + 0), 0.0f, 1.0f));
+			// UV for Vertex 3
+			floatData.push_back(glm::clamp(columnsStep * (float)(column + 1), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(row + 1), 0.0f, 1.0f));
+
+			//
+
+			byteLength = sizeof(float) * 8;
+
+			auto bufferView = json::object();
+			bufferView["buffer"] = 0;
+			bufferView["byteLength"] = byteLength;
+			bufferView["byteOffset"] = byteOffset;
+			byteOffset += byteLength;
+
+			glTF["bufferViews"].push_back(bufferView);
+
+			auto accessor = json::object();
+			accessor["bufferView"] = index;
+			accessor["byteOffset"] = 0;
+			accessor["componentType"] = 5126;
+			accessor["count"] = 4;
+			accessor["normalized"] = false;
+			accessor["type"] = "VEC2";
+
+			glTF["accessors"].push_back(accessor);
+
+			index++;
+		}
 	}
 
-	//
-	//
+	// Time as input
 
-	json glTF = json::parse(templateContent);
+	float frameTime = 1.0f / fps;
 
-	//
+	for (size_t i = 0; i < clips; i++)
+	{
+		floatData.push_back((float)i * frameTime);
 
-	std::vector<float> floatData;
+		glTF["animations"][0]["samplers"][i]["input"] = glTF["accessors"].size();
+	}
+	// Storing two values
+	byteLength = sizeof(float) * clips;
+
+	auto accessor = json::object();
+	auto bufferView = json::object();
+
+	bufferView["buffer"] = 0;
+	bufferView["byteLength"] = byteLength;
+	bufferView["byteOffset"] = byteOffset;
+
+	accessor["bufferView"] = glTF["bufferViews"].size();
+	accessor["componentType"] = 5126;
+	accessor["count"] = clips;
+	accessor["min"] = json::array();
+	accessor["min"][0] = 0.0;
+	accessor["max"] = json::array();
+	accessor["max"][0] = floatData.back() + frameTime;	// Last frame should not switch immediately
+	accessor["type"] = "SCALAR";
+
+	glTF["bufferViews"].push_back(bufferView);
+	glTF["accessors"].push_back(accessor);
+
+	byteOffset += byteLength;
+
+	// Scale as output
+
+	for (size_t i = 0; i < clips; i++)
+	{
+		for (size_t k = 0; k < clips; k++)
+		{
+			if (i == k)
+			{
+				floatData.push_back(1.0f);
+				floatData.push_back(1.0f);
+				floatData.push_back(1.0f);
+			}
+			else
+			{
+				floatData.push_back(epsilon);
+				floatData.push_back(epsilon);
+				floatData.push_back(epsilon);
+			}
+		}
+		byteLength = sizeof(float) * 3 * clips;
+
+		accessor = json::object();
+		bufferView = json::object();
+
+		bufferView["buffer"] = 0;
+		bufferView["byteLength"] = byteLength;
+		bufferView["byteOffset"] = byteOffset;
+
+		accessor["bufferView"] = glTF["bufferViews"].size();
+		accessor["componentType"] = 5126;
+		accessor["count"] = clips;
+		accessor["type"] = "VEC3";
+
+		glTF["animations"][0]["samplers"][i]["output"] = glTF["accessors"].size();
+
+		glTF["bufferViews"].push_back(bufferView);
+		glTF["accessors"].push_back(accessor);
+
+		byteOffset += byteLength;
+	}
+}
+
+void generateTranslation(json& glTF, std::vector<float>& floatData, const size_t rows, const size_t columns, const float fps, const float epsilon)
+{
+	size_t clips = rows * columns;
+
+	// Nodes and meshes
+	size_t newBuffer = 3;
+
+	for (size_t i = 0; i < clips; i++)
+	{
+		glTF["nodes"].push_back(json::object());
+		glTF["nodes"][i + 1]["mesh"] = i;
+		glTF["nodes"][i + 1]["translation"] = json::array();
+
+		if (i > 0)
+		{
+			glTF["nodes"][i + 1]["translation"][0] = epsilon;
+			glTF["nodes"][i + 1]["translation"][1] = epsilon;
+			glTF["nodes"][i + 1]["translation"][2] = epsilon;
+
+			glTF["meshes"].push_back(glTF["meshes"][0]);
+
+			glTF["animations"][0]["channels"].push_back(glTF["animations"][0]["channels"][0]);
+			glTF["animations"][0]["samplers"].push_back(glTF["animations"][0]["samplers"][0]);
+		}
+		else
+		{
+			glTF["nodes"][i + 1]["translation"][0] = 0.0f;
+			glTF["nodes"][i + 1]["translation"][1] = 0.0f;
+			glTF["nodes"][i + 1]["translation"][2] = 0.0f;
+
+			// Mesh does already exist
+
+			// Channel does already exist
+
+			// Sampler does already exist
+		}
+
+		glTF["meshes"][i]["primitives"][0]["attributes"]["TEXCOORD_0"] = newBuffer + i;
+
+		glTF["nodes"][0]["children"].push_back(i + 1);
+
+		glTF["animations"][0]["channels"][i]["sampler"] = i;
+		glTF["animations"][0]["channels"][i]["target"]["node"] = i + 1;
+	}
+
+	// Frames
+
+	size_t index = newBuffer;
+
+	size_t byteOffset = 108;
+	size_t byteLength = 0;
+
+	float columnsStep = 1.0f / (float)columns;
+	float rowsStep = 1.0f / (float)rows;
+
+	for (size_t row = 0; row < rows; row++)
+	{
+		for (size_t column = 0; column < columns; column++)
+		{
+			// UV for Vertex 0
+			floatData.push_back(glm::clamp(columnsStep * (float)(column + 0), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(row + 0), 0.0f, 1.0f));
+			// UV for Vertex 1
+			floatData.push_back(glm::clamp(columnsStep * (float)(column + 0), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(row + 1), 0.0f, 1.0f));
+
+			// UV for Vertex 2
+			floatData.push_back(glm::clamp(columnsStep * (float)(column + 1), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(row + 0), 0.0f, 1.0f));
+			// UV for Vertex 3
+			floatData.push_back(glm::clamp(columnsStep * (float)(column + 1), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(row + 1), 0.0f, 1.0f));
+
+			//
+
+			byteLength = sizeof(float) * 8;
+
+			auto bufferView = json::object();
+			bufferView["buffer"] = 0;
+			bufferView["byteLength"] = byteLength;
+			bufferView["byteOffset"] = byteOffset;
+			byteOffset += byteLength;
+
+			glTF["bufferViews"].push_back(bufferView);
+
+			auto accessor = json::object();
+			accessor["bufferView"] = index;
+			accessor["byteOffset"] = 0;
+			accessor["componentType"] = 5126;
+			accessor["count"] = 4;
+			accessor["normalized"] = false;
+			accessor["type"] = "VEC2";
+
+			glTF["accessors"].push_back(accessor);
+
+			index++;
+		}
+	}
+
+	// Time as input
+
+	float frameTime = 1.0f / fps;
+
+	for (size_t i = 0; i < clips; i++)
+	{
+		floatData.push_back((float)i * frameTime);
+
+		glTF["animations"][0]["samplers"][i]["input"] = glTF["accessors"].size();
+	}
+	// Storing two values
+	byteLength = sizeof(float) * clips;
+
+	auto accessor = json::object();
+	auto bufferView = json::object();
+
+	bufferView["buffer"] = 0;
+	bufferView["byteLength"] = byteLength;
+	bufferView["byteOffset"] = byteOffset;
+
+	accessor["bufferView"] = glTF["bufferViews"].size();
+	accessor["componentType"] = 5126;
+	accessor["count"] = clips;
+	accessor["min"] = json::array();
+	accessor["min"][0] = 0.0;
+	accessor["max"] = json::array();
+	accessor["max"][0] = floatData.back() + frameTime;	// Last frame should not switch immediately
+	accessor["type"] = "SCALAR";
+
+	glTF["bufferViews"].push_back(bufferView);
+	glTF["accessors"].push_back(accessor);
+
+	byteOffset += byteLength;
+
+	// Translation as output
+
+	for (size_t i = 0; i < clips; i++)
+	{
+		for (size_t k = 0; k < clips; k++)
+		{
+			if (i == k)
+			{
+				floatData.push_back(0.0f);
+				floatData.push_back(0.0f);
+				floatData.push_back(0.0f);
+			}
+			else
+			{
+				floatData.push_back(epsilon);
+				floatData.push_back(epsilon);
+				floatData.push_back(epsilon);
+			}
+		}
+		// Storing two vector values
+		byteLength = sizeof(float) * 3 * clips;
+
+		accessor = json::object();
+		bufferView = json::object();
+
+		bufferView["buffer"] = 0;
+		bufferView["byteLength"] = byteLength;
+		bufferView["byteOffset"] = byteOffset;
+
+		accessor["bufferView"] = glTF["bufferViews"].size();
+		accessor["componentType"] = 5126;
+		accessor["count"] = clips;
+		accessor["type"] = "VEC3";
+
+		glTF["animations"][0]["samplers"][i]["output"] = glTF["accessors"].size();
+
+		glTF["bufferViews"].push_back(bufferView);
+		glTF["accessors"].push_back(accessor);
+
+		byteOffset += byteLength;
+	}
+}
+
+void generateMorph(json& glTF, std::vector<float>& floatData, const size_t rows, const size_t columns, const float fps)
+{
+	size_t clips = rows * columns;
 
 	// Weights and targets
 
@@ -207,6 +501,113 @@ int main(int argc, char *argv[])
 
 			index++;
 		}
+	}
+}
+
+int main(int argc, char *argv[])
+{
+	size_t rows = 1;
+	size_t columns = 6;
+	float fps = 5.0f;
+	std::string imageName = "pngegg.png";
+	size_t mode = 0;
+	float epsilon = 0.001f;
+
+    for (int i = 0; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-r") == 0 && (i + 1 < argc))
+        {
+            rows = (size_t)std::stoi(argv[i + 1]);
+        }
+        else if (strcmp(argv[i], "-c") == 0 && (i + 1 < argc))
+        {
+            columns = (size_t)std::stoi(argv[i + 1]);
+        }
+        else if (strcmp(argv[i], "-f") == 0 && (i + 1 < argc))
+        {
+            fps = (float)std::stof(argv[i + 1]);
+        }
+        else if (strcmp(argv[i], "-i") == 0 && (i + 1 < argc))
+        {
+        	imageName = argv[i + 1];
+        }
+        else if (strcmp(argv[i], "-m") == 0 && (i + 1 < argc))
+        {
+            mode = (size_t)std::stoi(argv[i + 1]);
+        }
+        else if (strcmp(argv[i], "-e") == 0 && (i + 1 < argc))
+        {
+            epsilon = (float)std::stof(argv[i + 1]);
+        }
+    }
+
+	//
+	//
+
+	std::string loadBinaryName = "scale.bin";
+	if (mode == 1)
+	{
+		loadBinaryName = "translation.bin";
+	}
+	else if (mode == 2)
+	{
+		loadBinaryName = "morph.bin";
+	}
+	std::string saveBinaryName = "untitled.bin";
+
+	std::string binaryContent;
+	if (!loadFile(binaryContent, loadBinaryName))
+	{
+		printf("Error: Could not load binary file '%s'\n", loadBinaryName.c_str());
+
+		return -1;
+	}
+
+	std::string loadTemplateName = "scale.gltf";
+	if (mode == 1)
+	{
+		loadTemplateName = "translation.gltf";
+	}
+	else if (mode == 2)
+	{
+		loadTemplateName = "morph.gltf";
+	}
+	std::string saveTemplateName = "untitled.gltf";
+
+    std::string templateContent;
+	if (!loadFile(templateContent, loadTemplateName))
+	{
+		printf("Error: Could not load template file '%s'\n", loadTemplateName.c_str());
+
+		return -1;
+	}
+
+	//
+	//
+
+	json glTF = json::parse(templateContent);
+
+	//
+
+	std::vector<float> floatData;
+
+	if (mode == 0)
+	{
+		generateScale(glTF, floatData, rows, columns, fps, epsilon);
+	}
+	else if (mode == 1)
+	{
+		generateTranslation(glTF, floatData, rows, columns, fps, 10000.0f);
+	}
+	else if (mode == 2)
+	{
+		generateMorph(glTF, floatData, rows, columns, fps);
+	}
+	else
+	{
+		printf("Error: Invalid mode %llu\n", mode);
+
+		return -1;
 	}
 
 	//

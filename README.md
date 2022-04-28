@@ -4,25 +4,38 @@
 
 clip2gltf2 is a command line tool for converting an animation strip to glTF 2.0.  
 [![](pngegg.png)](https://www.codeandweb.com/texturepacker/tutorials/how-to-create-a-sprite-sheet)  
-It uses the optional feature to morph texture coordinates in glTF 2.0: 
-[3.7.2.2. Morph Targets](https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#morph-targets)  
+The animation strip image has to be organized into a grid with rows and columns.  
 
-Usage: `clip2gltf2.exe [-r 1 -c 6 -f 5.0 -i pngegg.png]`
+Usage: `clip2gltf2.exe [-r 1 -c 6 -f 5.0 -i pngegg.png -m 0 -e 0.001]`  
 
 `-r 1.0` Number of rows of the animation strip.  
 `-c 6.0` Number of columns of the animation strip.  
 `-f 5.0` Frames per second to be used.  
 `-i pngegg.png` Use another image beside the included animation strip.  
+`-m 0` Used animation mode. `0` is the scale, `1` the translation, `2` the morph mode.  
+`-e 0.001` Epsilon used for small scale number. `0.0` is invalid. Only used in mode `0`.  
 
+## Modes
+
+### Scale
+
+The default mode and only uses glTF 2.0 core features.  
+
+### Translation
+
+An alternative mode and also only uses glTF 2.0 core features.  
+
+### Morph
+
+This mode uses the optional feature to morph texture coordinates in glTF 2.0: 
+[3.7.2.2. Morph Targets](https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#morph-targets)  
 
 ## Software Requirements
 
 * C/C++ 17 compiler e.g. gcc or Visual C++
-* [Eclipse IDE for C/C++ Developers](https://www.eclipse.org/downloads/packages/release/2021-03/r/eclipse-ide-cc-developers) or  
+* [Eclipse IDE for C/C++ Developers](https://www.eclipse.org/downloads/packages/release/2022-03/r/eclipse-ide-cc-developers) or  
 * [CMake](https://cmake.org/)  
 
+## Viewing
 
-## Import the generated glTF
-
-Import the generated glTF in e.g. [Gestaltor](https://gestaltor.io/) and reuse in your scene.  
-
+Try out the generated glTF in [Gestaltor](https://gestaltor.io/).  
