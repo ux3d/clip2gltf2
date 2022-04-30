@@ -103,17 +103,17 @@ void generateScale(json& glTF, std::vector<float>& floatData, const size_t rows,
 		{
 			// UV for Vertex 0
 			floatData.push_back(glm::clamp(columnsStep * (float)(column + 0), 0.0f, 1.0f));
-			floatData.push_back(glm::clamp(rowsStep * (float)(row + 0), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(rows - 1 - row + 0), 0.0f, 1.0f));
 			// UV for Vertex 1
 			floatData.push_back(glm::clamp(columnsStep * (float)(column + 0), 0.0f, 1.0f));
-			floatData.push_back(glm::clamp(rowsStep * (float)(row + 1), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(rows - 1 - row + 1), 0.0f, 1.0f));
 
 			// UV for Vertex 2
 			floatData.push_back(glm::clamp(columnsStep * (float)(column + 1), 0.0f, 1.0f));
-			floatData.push_back(glm::clamp(rowsStep * (float)(row + 0), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(rows - 1 - row + 0), 0.0f, 1.0f));
 			// UV for Vertex 3
 			floatData.push_back(glm::clamp(columnsStep * (float)(column + 1), 0.0f, 1.0f));
-			floatData.push_back(glm::clamp(rowsStep * (float)(row + 1), 0.0f, 1.0f));
+			floatData.push_back(glm::clamp(rowsStep * (float)(rows - 1 - row + 1), 0.0f, 1.0f));
 
 			//
 
@@ -217,182 +217,6 @@ void generateScale(json& glTF, std::vector<float>& floatData, const size_t rows,
 	}
 }
 
-void generateTranslation(json& glTF, std::vector<float>& floatData, const size_t rows, const size_t columns, const float duration, const float epsilon)
-{
-	size_t clips = rows * columns;
-
-	// Nodes and meshes
-	size_t newBuffer = 3;
-
-	for (size_t i = 0; i < clips; i++)
-	{
-		glTF["nodes"].push_back(json::object());
-		glTF["nodes"][i + 1]["mesh"] = i;
-		glTF["nodes"][i + 1]["translation"] = json::array();
-
-		if (i > 0)
-		{
-			glTF["nodes"][i + 1]["translation"][0] = epsilon;
-			glTF["nodes"][i + 1]["translation"][1] = epsilon;
-			glTF["nodes"][i + 1]["translation"][2] = epsilon;
-
-			glTF["meshes"].push_back(glTF["meshes"][0]);
-
-			glTF["animations"][0]["channels"].push_back(glTF["animations"][0]["channels"][0]);
-			glTF["animations"][0]["samplers"].push_back(glTF["animations"][0]["samplers"][0]);
-		}
-		else
-		{
-			glTF["nodes"][i + 1]["translation"][0] = 0.0f;
-			glTF["nodes"][i + 1]["translation"][1] = 0.0f;
-			glTF["nodes"][i + 1]["translation"][2] = 0.0f;
-
-			// Mesh does already exist
-
-			// Channel does already exist
-
-			// Sampler does already exist
-		}
-
-		glTF["meshes"][i]["primitives"][0]["attributes"]["TEXCOORD_0"] = newBuffer + i;
-
-		glTF["nodes"][0]["children"].push_back(i + 1);
-
-		glTF["animations"][0]["channels"][i]["sampler"] = i;
-		glTF["animations"][0]["channels"][i]["target"]["node"] = i + 1;
-	}
-
-	// Frames
-
-	size_t index = newBuffer;
-
-	size_t byteOffset = 108;
-	size_t byteLength = 0;
-
-	float columnsStep = 1.0f / (float)columns;
-	float rowsStep = 1.0f / (float)rows;
-
-	for (size_t row = 0; row < rows; row++)
-	{
-		for (size_t column = 0; column < columns; column++)
-		{
-			// UV for Vertex 0
-			floatData.push_back(glm::clamp(columnsStep * (float)(column + 0), 0.0f, 1.0f));
-			floatData.push_back(glm::clamp(rowsStep * (float)(row + 0), 0.0f, 1.0f));
-			// UV for Vertex 1
-			floatData.push_back(glm::clamp(columnsStep * (float)(column + 0), 0.0f, 1.0f));
-			floatData.push_back(glm::clamp(rowsStep * (float)(row + 1), 0.0f, 1.0f));
-
-			// UV for Vertex 2
-			floatData.push_back(glm::clamp(columnsStep * (float)(column + 1), 0.0f, 1.0f));
-			floatData.push_back(glm::clamp(rowsStep * (float)(row + 0), 0.0f, 1.0f));
-			// UV for Vertex 3
-			floatData.push_back(glm::clamp(columnsStep * (float)(column + 1), 0.0f, 1.0f));
-			floatData.push_back(glm::clamp(rowsStep * (float)(row + 1), 0.0f, 1.0f));
-
-			//
-
-			byteLength = sizeof(float) * 8;
-
-			auto bufferView = json::object();
-			bufferView["buffer"] = 0;
-			bufferView["byteLength"] = byteLength;
-			bufferView["byteOffset"] = byteOffset;
-			byteOffset += byteLength;
-
-			glTF["bufferViews"].push_back(bufferView);
-
-			auto accessor = json::object();
-			accessor["bufferView"] = index;
-			accessor["byteOffset"] = 0;
-			accessor["componentType"] = 5126;
-			accessor["count"] = 4;
-			accessor["normalized"] = false;
-			accessor["type"] = "VEC2";
-
-			glTF["accessors"].push_back(accessor);
-
-			index++;
-		}
-	}
-
-	// Time as input
-
-	float frameTime = duration / (float)clips;
-
-	for (size_t i = 0; i < clips; i++)
-	{
-		floatData.push_back((float)i * frameTime);
-
-		glTF["animations"][0]["samplers"][i]["input"] = glTF["accessors"].size();
-	}
-	// Storing two values
-	byteLength = sizeof(float) * clips;
-
-	auto accessor = json::object();
-	auto bufferView = json::object();
-
-	bufferView["buffer"] = 0;
-	bufferView["byteLength"] = byteLength;
-	bufferView["byteOffset"] = byteOffset;
-
-	accessor["bufferView"] = glTF["bufferViews"].size();
-	accessor["componentType"] = 5126;
-	accessor["count"] = clips;
-	accessor["min"] = json::array();
-	accessor["min"][0] = 0.0;
-	accessor["max"] = json::array();
-	accessor["max"][0] = floatData.back() + frameTime;	// Last frame should not switch immediately
-	accessor["type"] = "SCALAR";
-
-	glTF["bufferViews"].push_back(bufferView);
-	glTF["accessors"].push_back(accessor);
-
-	byteOffset += byteLength;
-
-	// Translation as output
-
-	for (size_t i = 0; i < clips; i++)
-	{
-		for (size_t k = 0; k < clips; k++)
-		{
-			if (i == k)
-			{
-				floatData.push_back(0.0f);
-				floatData.push_back(0.0f);
-				floatData.push_back(0.0f);
-			}
-			else
-			{
-				floatData.push_back(epsilon);
-				floatData.push_back(epsilon);
-				floatData.push_back(epsilon);
-			}
-		}
-		// Storing two vector values
-		byteLength = sizeof(float) * 3 * clips;
-
-		accessor = json::object();
-		bufferView = json::object();
-
-		bufferView["buffer"] = 0;
-		bufferView["byteLength"] = byteLength;
-		bufferView["byteOffset"] = byteOffset;
-
-		accessor["bufferView"] = glTF["bufferViews"].size();
-		accessor["componentType"] = 5126;
-		accessor["count"] = clips;
-		accessor["type"] = "VEC3";
-
-		glTF["animations"][0]["samplers"][i]["output"] = glTF["accessors"].size();
-
-		glTF["bufferViews"].push_back(bufferView);
-		glTF["accessors"].push_back(accessor);
-
-		byteOffset += byteLength;
-	}
-}
-
 void generateMorph(json& glTF, std::vector<float>& floatData, const size_t rows, const size_t columns, const float duration)
 {
 	size_t clips = rows * columns;
@@ -465,17 +289,17 @@ void generateMorph(json& glTF, std::vector<float>& floatData, const size_t rows,
 		{
 			// UV for Vertex 0
 			floatData.push_back(columnsStep * (float)column);
-			floatData.push_back(rowsStep * (float)row);
+			floatData.push_back(rowsStep * (float)(rows - 1 - row + 0));
 			// UV for Vertex 1
 			floatData.push_back(columnsStep * (float)column);
-			floatData.push_back(rowsStep * (float)row);
+			floatData.push_back(rowsStep * (float)(rows - 1 - row + 0));
 
 			// UV for Vertex 2
 			floatData.push_back(-1.0f + columnsStep * (float)(column + 1));
-			floatData.push_back(-1.0f + rowsStep * (float)(row + 1));
+			floatData.push_back(-1.0f + rowsStep * (float)(rows - 1 - row + 1));
 			// UV for Vertex 3
 			floatData.push_back(-1.0f + columnsStep * (float)(column + 1));
-			floatData.push_back(-1.0f + rowsStep * (float)(row + 1));
+			floatData.push_back(-1.0f + rowsStep * (float)(rows - 1 - row + 1));
 
 			//
 
@@ -512,7 +336,6 @@ int main(int argc, char *argv[])
 	std::string imageName = "RunningGirl.png";
 	size_t mode = 0;
 	float epsilon = 0.001f;
-	float googol = 10000.0f;
 
     for (int i = 0; i < argc; i++)
     {
@@ -540,10 +363,6 @@ int main(int argc, char *argv[])
         {
             epsilon = (float)std::stof(argv[i + 1]);
         }
-        else if (strcmp(argv[i], "-g") == 0 && (i + 1 < argc))
-        {
-            googol = (float)std::stof(argv[i + 1]);
-        }
     }
 
 	//
@@ -551,10 +370,6 @@ int main(int argc, char *argv[])
 
 	std::string loadBinaryName = "scale.bin";
 	if (mode == 1)
-	{
-		loadBinaryName = "translation.bin";
-	}
-	else if (mode == 2)
 	{
 		loadBinaryName = "morph.bin";
 	}
@@ -570,10 +385,6 @@ int main(int argc, char *argv[])
 
 	std::string loadTemplateName = "scale.gltf";
 	if (mode == 1)
-	{
-		loadTemplateName = "translation.gltf";
-	}
-	else if (mode == 2)
 	{
 		loadTemplateName = "morph.gltf";
 	}
@@ -601,10 +412,6 @@ int main(int argc, char *argv[])
 		generateScale(glTF, floatData, rows, columns, duration, epsilon);
 	}
 	else if (mode == 1)
-	{
-		generateTranslation(glTF, floatData, rows, columns, duration, googol);
-	}
-	else if (mode == 2)
 	{
 		generateMorph(glTF, floatData, rows, columns, duration);
 	}
