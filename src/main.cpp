@@ -512,6 +512,7 @@ int main(int argc, char *argv[])
 	std::string imageName = "RunningGirl.png";
 	size_t mode = 0;
 	float epsilon = 0.001f;
+	float googol = 10000.0f;
 
     for (int i = 0; i < argc; i++)
     {
@@ -538,6 +539,10 @@ int main(int argc, char *argv[])
         else if (strcmp(argv[i], "-e") == 0 && (i + 1 < argc))
         {
             epsilon = (float)std::stof(argv[i + 1]);
+        }
+        else if (strcmp(argv[i], "-g") == 0 && (i + 1 < argc))
+        {
+            googol = (float)std::stof(argv[i + 1]);
         }
     }
 
@@ -597,7 +602,7 @@ int main(int argc, char *argv[])
 	}
 	else if (mode == 1)
 	{
-		generateTranslation(glTF, floatData, rows, columns, duration, 10000.0f);
+		generateTranslation(glTF, floatData, rows, columns, duration, googol);
 	}
 	else if (mode == 2)
 	{
