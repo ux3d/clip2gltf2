@@ -3,15 +3,15 @@
 # Animation strip to glTF 2.0 converter
 
 clip2gltf2 is a command line tool for converting an animation strip to glTF 2.0.  
-[![](pngegg.png)](https://www.codeandweb.com/texturepacker/tutorials/how-to-create-a-sprite-sheet)  
+[![](RunningGirl.png)](https://www.codeandweb.com/texturepacker/tutorials/how-to-create-a-sprite-sheet)  
 The animation strip image has to be organized into a grid with rows and columns.  
 
-Usage: `clip2gltf2.exe [-r 1 -c 6 -f 5.0 -i pngegg.png -m 0 -e 0.001]`  
+Usage: `clip2gltf2.exe [-r 1 -c 6 -d 1.0 -i RunningGirl.png -m 0 -e 0.001]`  
 
 `-r 1.0` Number of rows of the animation strip.  
 `-c 6.0` Number of columns of the animation strip.  
-`-f 5.0` Frames per second to be used.  
-`-i pngegg.png` Use another image beside the included animation strip.  
+`-d 1.0` Duration in seconds.  
+`-i RunningGirl.png` Use another image beside the included animation strip.  
 `-m 0` Used animation mode. `0` is the scale, `1` the translation, `2` the morph mode.  
 `-e 0.001` Epsilon used for small scale number. `0.0` is invalid. Only used in mode `0`.  
 

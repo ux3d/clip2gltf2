@@ -42,7 +42,7 @@ bool saveFile(const std::string& output, const std::string& filename)
 	return true;
 }
 
-void generateScale(json& glTF, std::vector<float>& floatData, const size_t rows, const size_t columns, const float fps, const float epsilon)
+void generateScale(json& glTF, std::vector<float>& floatData, const size_t rows, const size_t columns, const float duration, const float epsilon)
 {
 	size_t clips = rows * columns;
 
@@ -143,7 +143,7 @@ void generateScale(json& glTF, std::vector<float>& floatData, const size_t rows,
 
 	// Time as input
 
-	float frameTime = 1.0f / fps;
+	float frameTime = duration / (float)clips;
 
 	for (size_t i = 0; i < clips; i++)
 	{
@@ -217,7 +217,7 @@ void generateScale(json& glTF, std::vector<float>& floatData, const size_t rows,
 	}
 }
 
-void generateTranslation(json& glTF, std::vector<float>& floatData, const size_t rows, const size_t columns, const float fps, const float epsilon)
+void generateTranslation(json& glTF, std::vector<float>& floatData, const size_t rows, const size_t columns, const float duration, const float epsilon)
 {
 	size_t clips = rows * columns;
 
@@ -318,7 +318,7 @@ void generateTranslation(json& glTF, std::vector<float>& floatData, const size_t
 
 	// Time as input
 
-	float frameTime = 1.0f / fps;
+	float frameTime = duration / (float)clips;
 
 	for (size_t i = 0; i < clips; i++)
 	{
@@ -393,7 +393,7 @@ void generateTranslation(json& glTF, std::vector<float>& floatData, const size_t
 	}
 }
 
-void generateMorph(json& glTF, std::vector<float>& floatData, const size_t rows, const size_t columns, const float fps)
+void generateMorph(json& glTF, std::vector<float>& floatData, const size_t rows, const size_t columns, const float duration)
 {
 	size_t clips = rows * columns;
 
@@ -412,7 +412,7 @@ void generateMorph(json& glTF, std::vector<float>& floatData, const size_t rows,
 
 	// Time as input
 
-	float frameTime = 1.0f / fps;
+	float frameTime = duration / (float)clips;
 
 	size_t byteOffset = 140;
 
@@ -508,8 +508,8 @@ int main(int argc, char *argv[])
 {
 	size_t rows = 1;
 	size_t columns = 6;
-	float fps = 5.0f;
-	std::string imageName = "pngegg.png";
+	float duration = 1.0f;
+	std::string imageName = "RunningGirl.png";
 	size_t mode = 0;
 	float epsilon = 0.001f;
 
@@ -523,9 +523,9 @@ int main(int argc, char *argv[])
         {
             columns = (size_t)std::stoi(argv[i + 1]);
         }
-        else if (strcmp(argv[i], "-f") == 0 && (i + 1 < argc))
+        else if (strcmp(argv[i], "-d") == 0 && (i + 1 < argc))
         {
-            fps = (float)std::stof(argv[i + 1]);
+            duration = (float)std::stof(argv[i + 1]);
         }
         else if (strcmp(argv[i], "-i") == 0 && (i + 1 < argc))
         {
@@ -593,15 +593,15 @@ int main(int argc, char *argv[])
 
 	if (mode == 0)
 	{
-		generateScale(glTF, floatData, rows, columns, fps, epsilon);
+		generateScale(glTF, floatData, rows, columns, duration, epsilon);
 	}
 	else if (mode == 1)
 	{
-		generateTranslation(glTF, floatData, rows, columns, fps, 10000.0f);
+		generateTranslation(glTF, floatData, rows, columns, duration, 10000.0f);
 	}
 	else if (mode == 2)
 	{
-		generateMorph(glTF, floatData, rows, columns, fps);
+		generateMorph(glTF, floatData, rows, columns, duration);
 	}
 	else
 	{
